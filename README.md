@@ -166,15 +166,11 @@ python client.py
 - [ ] 🔐 Система аутентификации и статистики
 - [ ] 📱 Кроссплатформенная поддержка
 
-## 📜 Лицензия
-
-Этот проект распространяется под лицензией MIT. Дополнительную информацию смотрите в файле [LICENSE](LICENSE).
-
 ---
 
 <div align="center">
   <p>Нравится проект? Поставьте ⭐️ на GitHub!</p>
-  <a href="https://github.com/username/pygame-network-platformer/issues">📢 Сообщить о проблеме</a> •
-  <a href="https://github.com/username/pygame-network-platformer/fork">🍴 Fork</a> •
-  <a href="https://github.com/username/pygame-network-platformer/pulls">🛠️ Pull Request</a>
+  <a href="https://github.com/Maksim0905/yandex_lms_pygame/issues">📢 Сообщить о проблеме</a> •
+  <a href="https://github.com/Maksim0905/yandex_lms_pygame/fork">🍴 Fork</a> •
+  <a href="https://github.com/Maksim0905/yandex_lms_pygame/pulls">🛠️ Pull Request</a>
 </div>
