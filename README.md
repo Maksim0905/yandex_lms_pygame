@@ -87,8 +87,8 @@ pip install pygame
 
 1. Клонируйте репозиторий:
 ```bash
-git clone https://github.com/username/pygame-network-platformer.git
-cd pygame-network-platformer
+git clone https://github.com/Maksim0905/yandex_lms_pygame.git
+cd yandex_lms_pygame
 ```
 
 2. Установите зависимости:
