@@ -177,157 +177,197 @@ class Room:
         self.platforms = self.generate_platforms()
         self.clients = {}  # Добавлено для хранения связи игроков с их сокетами
 
-        def generate_platforms(self):
-            platforms = []
-            # Основная платформа (земля)
-            platforms.append(Platform(0, SCREEN_HEIGHT - 20, SCREEN_WIDTH))
-    
-            # Параметры прыжка
-            jump_height = (JUMP_FORCE**2) / (2 * GRAVITY)
-            jump_time = (2 * abs(JUMP_FORCE)) / GRAVITY
-            max_horizontal = MOVEMENT_SPEED * jump_time
-    
-            grid_size = 30
-            grid = [[False for _ in range((SCREEN_HEIGHT // grid_size) + 1)]
-                    for _ in range((SCREEN_WIDTH // grid_size) + 1)]
-    
-            for x in range(SCREEN_WIDTH // grid_size):
-                for y in range(3):
-                    if (SCREEN_HEIGHT // grid_size) - y >= 0:
-                        grid[x][(SCREEN_HEIGHT // grid_size) - y] = True
-    
-            top_target_y = 20
-            num_paths = random.randint(2, 3)
-            path_starting_points = [random.randint(
-                100, SCREEN_WIDTH - 300) for _ in range(num_paths)]
-    
-            min_path_distance = 150
-            path_starting_points.sort()
-    
-            for i in range(1, len(path_starting_points)):
-                if path_starting_points[i] - path_starting_points[i-1] < min_path_distance:
-                    path_starting_points[i] = path_starting_points[i -
-                                                                   1] + min_path_distance
-                    if path_starting_points[i] > SCREEN_WIDTH - 150:
-                        path_starting_points[i] = SCREEN_WIDTH - 150
-    
-            for path_index, start_x in enumerate(path_starting_points):
-                current_x = start_x
-                current_y = SCREEN_HEIGHT - 20 - jump_height * 0.8
-    
-                height_to_top = (SCREEN_HEIGHT - 20) - top_target_y
-                step_height = jump_height * 0.8
-    
-                platforms_to_top = int(height_to_top / step_height) + 1
-    
-                platforms_in_path = max(4, min(platforms_to_top, 8))
-                height_per_platform = height_to_top / (platforms_in_path)
-    
-                for i in range(platforms_in_path):
-                    platform_width = random.randint(80, 150)
-    
-                    # Проверяем, что платформа не выходит за пределы экрана
-                    current_x = max(
-                        10, min(current_x, SCREEN_WIDTH - platform_width - 10))
-                    new_platform = Platform(current_x, current_y, platform_width)
-    
-                    platform_cells = []
-                    for px in range(int(current_x) // grid_size,
-                                    (int(current_x) + platform_width) // grid_size + 1):
-                        if 0 <= px < len(grid):
-                            py = int(current_y) // grid_size
-                            if 0 <= py < len(grid[0]):
-                                platform_cells.append((px, py))
-    
-                    if not any(grid[px][py] for px, py in platform_cells if px < len(grid) and py < len(grid[0])):
-                        platforms.append(new_platform)
-                        for px, py in platform_cells:
-                            if px < len(grid) and py < len(grid[0]):
-                                grid[px][py] = True
-    
-                    if i == platforms_in_path - 2:
-                        current_y = top_target_y + jump_height * 0.3  # Небольшой запас для надежности
-                    else:
-                        current_y -= height_per_platform * random.uniform(0.8, 1.2)
-                    max_shift = max_horizontal * 0.85
-    
-                    # В зависимости от номера пути, смещаем платформы в разных направлениях
-                    # чтобы пути расходились
-                    if path_index % 2 == 0:
-                        horizontal_shift = random.uniform(-max_shift, max_shift/2)
-                    else:
-                        horizontal_shift = random.uniform(-max_shift/2, max_shift)
-    
-                    current_x += horizontal_shift
-    
-            for path_index, start_x in enumerate(path_starting_points):
-                highest_platform = None
-                highest_y = SCREEN_HEIGHT
-    
+    def generate_platforms(self):
+        platforms = []
+        # Основная платформа (земля)
+        platforms.append(Platform(0, SCREEN_HEIGHT - 20, SCREEN_WIDTH))
+
+        # Параметры прыжка
+        jump_height = (JUMP_FORCE**2) / (2 * GRAVITY)
+        jump_time = (2 * abs(JUMP_FORCE)) / GRAVITY
+        max_horizontal = MOVEMENT_SPEED * jump_time
+
+        # Минимальная высота между платформами (половина высоты прыжка)
+        min_vertical_distance = jump_height * 0.5
+
+        grid_size = 30
+        grid = [[False for _ in range((SCREEN_HEIGHT // grid_size) + 1)]
+                for _ in range((SCREEN_WIDTH // grid_size) + 1)]
+
+        for x in range(SCREEN_WIDTH // grid_size):
+            for y in range(3):
+                if (SCREEN_HEIGHT // grid_size) - y >= 0:
+                    grid[x][(SCREEN_HEIGHT // grid_size) - y] = True
+
+        top_target_y = 20 
+
+        # Создаем несколько "путей" наверх
+        num_paths = random.randint(2, 3)
+        path_starting_points = [random.randint(
+            100, SCREEN_WIDTH - 300) for _ in range(num_paths)]
+
+        # Минимальное расстояние между путями
+        min_path_distance = 150
+        path_starting_points.sort()
+
+        # Обеспечиваем минимальное расстояние между путями
+        for i in range(1, len(path_starting_points)):
+            if path_starting_points[i] - path_starting_points[i-1] < min_path_distance:
+                path_starting_points[i] = path_starting_points[i -
+                                                               1] + min_path_distance
+                if path_starting_points[i] > SCREEN_WIDTH - 150:
+                    path_starting_points[i] = SCREEN_WIDTH - 150
+
+        # Генерируем платформы для каждого пути
+        for path_index, start_x in enumerate(path_starting_points):
+            current_x = start_x
+            current_y = SCREEN_HEIGHT - 20 - jump_height * 0.8
+
+            height_to_top = (SCREEN_HEIGHT - 20) - top_target_y
+            step_height = min_vertical_distance * 1.2
+            platforms_to_top = int(height_to_top / step_height) + 1
+
+            platforms_in_path = max(4, min(platforms_to_top, 8))
+
+            height_per_platform = height_to_top / (platforms_in_path)
+            path_platform_heights = []
+
+            for i in range(platforms_in_path):
+                platform_width = random.randint(80, 150)
+
+                current_x = max(
+                    10, min(current_x, SCREEN_WIDTH - platform_width - 10))
+
+                if path_platform_heights:
+                    too_close = False
+                    for existing_y in path_platform_heights:
+                        if abs(current_y - existing_y) < min_vertical_distance:
+                            too_close = True
+                            break
+
+                    if too_close:
+                        closest_height = min(
+                            path_platform_heights, key=lambda y: abs(y - current_y))
+                        if current_y > closest_height:
+                            current_y = closest_height + min_vertical_distance
+                        else:
+                            current_y = closest_height - min_vertical_distance
+                new_platform = Platform(current_x, current_y, platform_width)
+
+                platform_cells = []
+                for px in range(int(current_x) // grid_size,
+                                (int(current_x) + platform_width) // grid_size + 1):
+                    if 0 <= px < len(grid):
+                        py = int(current_y) // grid_size
+                        if 0 <= py < len(grid[0]):
+                            platform_cells.append((px, py))
+
+                too_close_to_other_platforms = False
                 for platform in platforms[1:]:
-                    if platform.y < highest_y:
-                        highest_y = platform.y
-                        highest_platform = platform
-    
-                if highest_platform:
-                    # Размещаем финальную платформу в пределах досягаемости прыжка от самой высокой
-                    final_x = highest_platform.x + \
-                        random.uniform(-max_horizontal*0.5, max_horizontal*0.5)
-                    final_y = top_target_y
-                    final_width = random.randint(100, 180)
-                    final_x = max(
-                        10, min(final_x, SCREEN_WIDTH - final_width - 10))
-    
-                    can_place = True
-                    for platform in platforms:
-                        if (abs(platform.y - final_y) < 20 and
-                            final_x < platform.x + platform.width and
-                                final_x + final_width > platform.x):
+                    if abs(platform.y - current_y) < min_vertical_distance:
+                        if (current_x < platform.x + platform.width and
+                                current_x + platform_width > platform.x):
+                            too_close_to_other_platforms = True
+                            break
+
+                # Если нет пересечений и соблюдается минимальное расстояние, добавляем платформу
+                if (not any(grid[px][py] for px, py in platform_cells if px < len(grid) and py < len(grid[0])) and
+                        not too_close_to_other_platforms):
+                    platforms.append(new_platform)
+                    path_platform_heights.append(current_y)
+
+                    for px, py in platform_cells:
+                        if px < len(grid) and py < len(grid[0]):
+                            grid[px][py] = True
+                if i == platforms_in_path - 2:
+                    current_y = top_target_y + jump_height * 0.3
+                else:
+                    height_change = max(
+                        min_vertical_distance, height_per_platform * random.uniform(0.8, 1.2))
+                    current_y -= height_change
+
+                max_shift = max_horizontal * 0.85
+
+                # В зависимости от номера пути, смещаем платформы в разных направлениях
+                if path_index % 2 == 0:
+                    horizontal_shift = random.uniform(-max_shift, max_shift/2)
+                else:
+                    horizontal_shift = random.uniform(-max_shift/2, max_shift)
+
+                current_x += horizontal_shift
+
+        # Добавляем финальную "верхнюю" платформу для каждого пути
+        for path_index, start_x in enumerate(path_starting_points):
+            highest_platform = None
+            highest_y = SCREEN_HEIGHT
+
+            for platform in platforms[1:]:  # Пропускаем землю
+                if platform.y < highest_y:
+                    highest_y = platform.y
+                    highest_platform = platform
+
+            if highest_platform:
+                final_x = highest_platform.x + \
+                    random.uniform(-max_horizontal*0.5, max_horizontal*0.5)
+                final_y = top_target_y  # Размещаем у самого верха
+                # Чуть шире для надежности
+                final_width = random.randint(100, 180)
+
+                final_x = max(
+                    10, min(final_x, SCREEN_WIDTH - final_width - 10))
+
+                can_place = True
+                for platform in platforms:
+                    # Проверяем пересечения
+                    if (final_x < platform.x + platform.width and
+                            final_x + final_width > platform.x):
+                        # Если платформы могут пересекаться по горизонтали, проверяем вертикальное расстояние
+                        if abs(platform.y - final_y) < min_vertical_distance:
                             can_place = False
                             break
-    
-                    if can_place:
-                        platforms.append(Platform(final_x, final_y, final_width))
-    
-            if len(platforms) > 5:  # Если уже есть достаточно платформ
-                for _ in range(random.randint(2, 4)):
-                    if len(platforms) < 3:
-                        break
-    
-                    plat1_index = random.randint(1, len(platforms) - 1)
+
+                if can_place:
+                    platforms.append(Platform(final_x, final_y, final_width))
+
+        # Добавляем несколько соединительных платформ между путями
+        if len(platforms) > 5:
+            for _ in range(random.randint(2, 4)):
+                if len(platforms) < 3:
+                    break
+
+                plat1_index = random.randint(1, len(platforms) - 1)
+                plat2_index = random.randint(1, len(platforms) - 1)
+
+                attempts = 0
+                while (plat1_index == plat2_index or
+                       abs(platforms[plat1_index].y - platforms[plat2_index].y) < min_vertical_distance) and attempts < 10:
                     plat2_index = random.randint(1, len(platforms) - 1)
-    
-                    # Убеждаемся, что выбраны разные платформы
-                    attempts = 0
-                    while plat1_index == plat2_index and attempts < 5:
-                        plat2_index = random.randint(1, len(platforms) - 1)
-                        attempts += 1
-    
-                    if plat1_index == plat2_index:
-                        continue
-    
-                    plat1 = platforms[plat1_index]
-                    plat2 = platforms[plat2_index]
-    
-                    # Создаем соединительную платформу только если они на похожей высоте
-                    if abs(plat1.y - plat2.y) < jump_height * 0.5:
-                        connect_x = (plat1.x + plat2.x) / 2
-                        connect_y = (plat1.y + plat2.y) / 2
-                        connect_width = random.randint(70, 120)
-    
-                        can_place = True
-                        for platform in platforms:
-                            if (abs(platform.y - connect_y) < 20 and
-                                connect_x < platform.x + platform.width and
-                                    connect_x + connect_width > platform.x):
+                    attempts += 1
+
+                if plat1_index == plat2_index or abs(platforms[plat1_index].y - platforms[plat2_index].y) < min_vertical_distance:
+                    continue
+
+                plat1 = platforms[plat1_index]
+                plat2 = platforms[plat2_index]
+
+                if abs(plat1.y - plat2.y) < jump_height * 0.5 and abs(plat1.y - plat2.y) >= min_vertical_distance:
+                    connect_x = (plat1.x + plat2.x) / 2
+                    connect_y = (plat1.y + plat2.y) / 2
+                    connect_width = random.randint(70, 120)
+
+                    can_place = True
+                    for platform in platforms:
+                        if (connect_x < platform.x + platform.width and
+                                connect_x + connect_width > platform.x):
+                            if abs(platform.y - connect_y) < min_vertical_distance:
                                 can_place = False
                                 break
-    
-                        if can_place:
-                            platforms.append(
-                                Platform(connect_x, connect_y, connect_width))
-    
-            return platforms
+
+                    if can_place:
+                        platforms.append(
+                            Platform(connect_x, connect_y, connect_width))
+
+        return platforms
 
     def update(self, server):
         # Проверка на победу
