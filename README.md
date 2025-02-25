@@ -3,6 +3,7 @@
 [![Python](https://img.shields.io/badge/Python-3.7+-blue.svg)](https://www.python.org/downloads/)
 [![Pygame](https://img.shields.io/badge/Pygame-2.0+-green.svg)](https://www.pygame.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FMaksim0905%2Fyandex_lms_pygame&count_bg=%2379C83D&title_bg=%23555555&icon=github.svg&icon_color=%23FFFFFF&title=посетителей&edge_flat=false)
 
 <div align="center">
   <img src="https://github.com/Maksim0905/yandex_lms_pygame/blob/main/photo/game.png" alt="Скриншот игры" width="600"/>
