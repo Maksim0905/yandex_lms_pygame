@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 <div align="center">
-  <img src="[https://github.com/f1edc0c1-9d7f-4f35-9da6-b2c8594baeae](https://github.com/Maksim0905/yandex_lms_pygame/blob/main/photo/game.png)" alt="Скриншот игры" width="600"/>
+  <img src="https://github.com/Maksim0905/yandex_lms_pygame/blob/main/photo/game.png" alt="Скриншот игры" width="600"/>
   
   <p><i>Многопользовательская платформер-игра с сетевыми возможностями</i></p>
 </div>
