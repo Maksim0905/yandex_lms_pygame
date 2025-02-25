@@ -58,7 +58,7 @@
 ## 📁 Структура проекта
 
 ```
-📦 pygame-network-platformer
+📦 yandex_lms_pygame
  ┣ 📜 client.py - клиентская часть игры
  ┣ 📜 server.py - серверная часть игры
  ┣ 📂 assets/ - папка с игровыми ресурсами
